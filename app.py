@@ -20,27 +20,24 @@ def upload_image():
     image_array = np.fromstring(reading_file_data, dtype='uint8')
     decode_array_to_img = cv2.imdecode(image_array, cv2.IMREAD_UNCHANGED)
 
-
-    # Write code for Select option for Gray and Sketch
-    if operation_selection=="gray":
-        file_data=make_grayscale(decode_array_to_img)
-    elif operation_selection=="sketch":
-        file_data=image_sketch(decode_array_to_img)
-    else:
-        print("No image selected.")
-
-
-
-
+    if operation_selection == 'gray':
+        file_data = make_grayscale(decode_array_to_img)
+    elif operation_selection == 'sketch':
+        file_data = image_sketch(decode_array_to_img)
+    #write elif condition for oil image
+    elif operation_selection=='oil':
+        file_data = oil_effect(decode_array_to_img)
+    elif operation_selection=='rgb':
+        file_data=rgb_effect(decode_array_to_img)
 
 
     # Ends here
-
     with open(os.path.join('static/', filename),
                   'wb') as f:
         f.write(file_data)
 
     return render_template('upload.html', filename=filename)
+
 
 def make_grayscale(decode_array_to_img):
 
@@ -50,15 +47,32 @@ def make_grayscale(decode_array_to_img):
     return output_image
 
 
-# Write code for Sketch function
 def image_sketch(decode_array_to_img):
-    converted_gray_img=cv2.cvtColor(decode_array_to_img,cv2.COLOR_BGR2GRAY)
-    sharpened_img=cv2.bitwise_not(converted_gray_img)
-    blurred_img=cv2.GaussianBlur(sharpened_img,(111,111,0))
-    sharpened_blurred_img=cv2.bitwise_not(blurred_img)
-    sketch_img=cv2.divide(converted_gray_img,sharpened_blurred_img,scale=256.0)
-    status,output_image=cv2.imencode('.PNG',sketch_img)
-    return output_image
+
+    converted_gray_img = cv2.cvtColor(decode_array_to_img, cv2.COLOR_BGR2GRAY)
+    sharping_gray_img = cv2.bitwise_not(converted_gray_img)
+    blur_img = cv2.GaussianBlur(sharping_gray_img, (111, 111), 0)
+    sharping_blur_img = cv2.bitwise_not(blur_img)
+    sketch_img = cv2.divide(converted_gray_img, sharping_blur_img, scale=256.0)
+    status, output_img = cv2.imencode('.PNG', sketch_img)
+
+    return output_img
+
+# Starts Oil Effect function From here
+def oil_effect(decode_array_to_img):
+    oil_img=cv2.photo.oilPainting(decode_array_to_img,7,1)
+    status, output_img = cv2.imencode('.PNG', oil_img)
+    return output_img
+# Ends Here
+# Starts RGB Effect function From here
+def rgb_effect(decode_array_to_img):
+    rgb_img=cv2.cvtColor(decode_array_to_img,cv2.COLOR_BGR2RGB)
+    status, output_img = cv2.imencode('.PNG', rgb_img)
+    return  output_img
+
+
+
+
 
 # Ends here
 
@@ -72,16 +86,3 @@ def display_image(filename):
 
 if __name__ == "__main__":
     app.run()
-
-
-
-
-
-
-
-
-
-
-
-
-
