@@ -14,7 +14,7 @@ def upload_form():
 @app.route('/', methods=['POST'])
 def upload_image():
     #write operation_selection  
-    operation_selection=request.forms['image_type_selection']
+    operation_selection=request.form['image_type_selection']
     
     image_file = request.files['file']
     filename = secure_filename(image_file.filename)
